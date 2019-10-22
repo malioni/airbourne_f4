@@ -249,7 +249,7 @@ void MS5611::convert()
 bool MS5611::start_temp_meas()
 {
   waiting_for_cb_ = true;
-  last_update_ms_ = millis();
+  // last_update_ms_ = millis();
   callback_type_ = CB_TEMP_START;
   return i2c_->write(ADDR, ADC_CONV | ADC_D2 | ADC_4096, &cb) == I2C::RESULT_SUCCESS;
 }
@@ -257,7 +257,7 @@ bool MS5611::start_temp_meas()
 bool MS5611::start_pres_meas()
 {
   waiting_for_cb_ = true;
-  last_update_ms_ = millis();
+  // last_update_ms_ = millis();
   callback_type_ = CB_PRES_START;
   return i2c_->write(ADDR, ADC_CONV | ADC_D1 | ADC_4096, &cb) == I2C::RESULT_SUCCESS;
 }

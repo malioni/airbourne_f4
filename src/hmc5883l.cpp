@@ -42,7 +42,7 @@ bool HMC5883L::init(I2C *i2c_drv)
     i2c_ = i2c_drv;
 
     // Wait for the chip to power up
-    while (millis() < 10);
+    while (millis() < 14);
 
     last_update_ms_ = millis();
     next_update_ms_ = millis();
@@ -83,11 +83,11 @@ void HMC5883L::update()
 {
     if ( millis() > next_update_ms_)
     {
-        if (!present())
+        if (!present()) 
           i2c_->checkPresent(ADDR, &read_cb);
         else
           i2c_->read(ADDR, DATA, i2c_buf_, 6, &read_cb);
-        next_update_ms_ += 10;
+        next_update_ms_ += 14;
     }
 }
 
