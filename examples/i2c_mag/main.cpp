@@ -86,6 +86,6 @@ int main() {
       warn.on();
       printf("error\n");     
     }
-    delay(10);
+    // delay(10);
   }
 }

@@ -113,7 +113,7 @@ int main() {
     if (millis() > print_update + 20)
     {
       if (baro_success)
-        printf("%d Pa, %d.%d K\n",
+        printf("%d Pa, %d.%02d K\n", // see if 02d works
                (int32_t)(pressure),
                (int32_t)(temperature),
                (int32_t)(temperature*100)%100);

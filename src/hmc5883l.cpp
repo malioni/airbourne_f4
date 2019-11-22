@@ -74,8 +74,10 @@ bool HMC5883L::configure(uint8_t reg, uint8_t val)
 
 bool HMC5883L::present()
 {
-    if (mag_present_ && millis() > last_update_ms_ + 200)
+    if (mag_present_ && millis() > last_update_ms_ + 200) {
         mag_present_ = false;
+        last_update_ms_ = millis();
+    }
     return mag_present_;
 }
 

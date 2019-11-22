@@ -62,12 +62,13 @@ int main() {
 
   info.on();
   I2C i2c1;
-  i2c1.init(&i2c_config[BARO_I2C]);
+  i2c1.init(&i2c_config[EXTERNAL_I2C]);
   MS5611 baro;
 
   baro.init(&i2c1);
 
   float pressure, temperature;
+
   while(1)
   {
     baro.update();
@@ -76,7 +77,7 @@ int main() {
       warn.off();
       info.toggle();
       baro.read(&pressure, &temperature);
-      printf("%d Pa, %d.%d K\n",
+      printf("%d Pa, %d.%02d K\n",
              (int32_t)(pressure),
              (int32_t)(temperature),
              (int32_t)(temperature*100)%100);
@@ -87,6 +88,7 @@ int main() {
     {
       warn.on();
       printf("error\n");
+      // break;
     }
   }
 }

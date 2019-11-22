@@ -326,7 +326,7 @@ void MS5611::pres_start_cb(uint8_t result)
   next_update_ms_ = last_update_ms_ + 9;
 }
 
-void MS5611::read(float * press, float* temp)
+void MS5611::read(float* press, float* temp)
 {
   (*press) = pressure_;
   (*temp) = temperature_;

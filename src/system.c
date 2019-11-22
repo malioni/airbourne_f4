@@ -43,7 +43,7 @@ void SysTick_Handler(void)
 // Return system uptime in microseconds (rollover in 1.5 days)
 volatile uint64_t micros(void)
 {
-  return (sysTickUptime * 3125ul)/100ul;  // The convsersion is 31.25, so doing fixed-point math to be exact
+  return (sysTickUptime * 3125ul)/100ul;  // The conversion is 31.25, so doing fixed-point math to be exact
 }
 
 // Return system uptime in milliseconds (rollover in 1.5 days)
