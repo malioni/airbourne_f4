@@ -489,7 +489,7 @@ void I2C::handleTask()
     I2C_DMACmd(c_->dev, ENABLE);
     DMA_ITConfig(c_->DMA_Stream, DMA_IT_TC, ENABLE);
     DMA_Cmd(c_->DMA_Stream, ENABLE);
-    expected_event_ = RXNE & BTF;
+    expected_event_ = RXNE | BTF;
     break;
 
   case TaskType::STOP:

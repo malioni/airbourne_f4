@@ -68,6 +68,7 @@ int main() {
   mag.init(&i2c1);
 
   float mag_data[3] = {0., 0., 0.};
+  uint32_t print_update = millis();
   while(1) 
   {
     mag.update();
@@ -76,16 +77,22 @@ int main() {
       warn.off();
       info.toggle();
       mag.read(mag_data);
-      printf("%d, %d, %d\n",
-             (int32_t)(mag_data[0]),
-             (int32_t)(mag_data[1]),
-             (int32_t)(mag_data[2]));
+      if (millis() > print_update + 10) 
+      {
+        printf("%d, %d, %d\n",
+              (int32_t)(mag_data[0]),
+              (int32_t)(mag_data[1]),
+              (int32_t)(mag_data[2]));
+              print_update = millis();
+      }
     }
-    else 
+    else if (millis() > print_update + 10)
     {
       warn.on();
-      printf("error\n");     
+      printf("error\n");    
+      print_update = millis();
     }
-    // delay(10);
+
+
   }
 }
