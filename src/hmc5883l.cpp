@@ -85,8 +85,11 @@ void HMC5883L::update()
 {
     if ( millis() > next_update_ms_)
     {
-        if (!present()) 
+        if (!present())
+        {
           i2c_->checkPresent(ADDR, &read_cb);
+          mag_present_ = true;
+        }
         else
           i2c_->read(ADDR, DATA, i2c_buf_, 6, &read_cb);
         next_update_ms_ += 14;

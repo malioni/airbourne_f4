@@ -39,7 +39,8 @@ I2C* I2C1_Ptr;
 I2C* I2C2_Ptr;
 I2C* I2C3_Ptr;
 
-
+uint32_t last_event_list[200];
+uint32_t last_event_head = 0;
 
 #define if_timeout(cond, us) \
 do {\
@@ -63,14 +64,14 @@ do {\
 #ifndef NDEBUG
 class DebugHistory
 {
-  uint32_t history_[60];
+  uint32_t history_[200];
   uint32_t head_ = 0;
 
 public:
   void add_event(uint32_t event)
   {
     history_[head_] = event;
-    head_ = (head_ + 1) % 60;
+    head_ = (head_ + 1) % 200;
   }
   void clear()
   {
@@ -89,7 +90,7 @@ DebugHistory interrupt_history_;
 
 bool I2C::TaskQueue::stage_push()
 {
-  if (len_ + stage_offset_ == TASK_BUFFER_SIZE)
+  if (len_ + stage_offset_ >= TASK_BUFFER_SIZE)
     return false;
 
   ++stage_offset_;
@@ -394,6 +395,14 @@ bool I2C::addTaskStop(void (*cb)(int8_t))
 
 bool I2C::finalizeJob()
 {
+
+  if (micros() - last_event_us_ >= 2000000) {
+    log_line;
+    busy_ = false;
+    handleEvent();
+    last_event_us_ = micros();
+  }
+
   if (!add_job_in_progress_)
     return false;
 
@@ -439,6 +448,12 @@ bool I2C::advanceTask()
 
 void I2C::handleTask()
 {
+  if (current_task_== nullptr)
+  {
+    busy_ = false;
+    return;
+  }
+
   log_line;
   busy_ = true;
   bool task_complete = true;
@@ -489,7 +504,7 @@ void I2C::handleTask()
     I2C_DMACmd(c_->dev, ENABLE);
     DMA_ITConfig(c_->DMA_Stream, DMA_IT_TC, ENABLE);
     DMA_Cmd(c_->DMA_Stream, ENABLE);
-    expected_event_ = RXNE | BTF;
+    expected_event_ = 0x00030000; //I2C_EVENT_MASTER_BYTE_RECEIVED; TRY WITHOUT BTF! I2C_FLAG_BTF;
     break;
 
   case TaskType::STOP:
@@ -513,7 +528,7 @@ void I2C::handleTask()
       log_line;
       I2C_ITConfig(c_->dev, I2C_IT_EVT | I2C_IT_ERR, DISABLE);
     }
-    else if (start_next_task)
+    else if (current_task_ && start_next_task)
     {
       log_line;
       handleTask();
@@ -526,12 +541,18 @@ void I2C::handleTask()
 void I2C::handleEvent()
 {
   last_event_ = I2C_GetLastEvent(c_->dev);
+  last_event_list[last_event_head] = last_event_;
+  last_event_head = (last_event_head + 1) % 200;
   log_line;
   if ((last_event_ & expected_event_) == expected_event_)
   {
     last_event_us_ = micros();
     log_line;
     handleTask();
+  }
+  else if (micros() - last_event_us_ >= 1000000) {
+    log_line;
+    handleError();
   }
 }
 
@@ -630,7 +651,7 @@ void I2C::unstick()
 /// Helper Abstractions
 int8_t I2C::checkPresent(uint8_t addr, void (*cb)(int8_t))
 {
-  clear_log;
+  // clear_log;
   log_line;
   bool blocking = (cb==nullptr);
   if (blocking)
@@ -666,7 +687,7 @@ int8_t I2C::read(uint8_t addr, uint8_t *data, size_t len, void (*cb)(int8_t))
 
 int8_t I2C::read(uint8_t addr, uint8_t reg, uint8_t *data, size_t len, void (*cb)(int8_t))
 {
-    clear_log;
+    // clear_log;
     log_line;
     bool blocking = (cb == nullptr);
 
@@ -720,7 +741,7 @@ int8_t I2C::write(uint8_t addr, uint8_t data, void(*cb)(int8_t))
 
 int8_t I2C::write(uint8_t addr, uint8_t reg, uint8_t *data, size_t len, void (*cb)(int8_t))
 {
-    clear_log;
+    // clear_log;
     log_line;
     bool blocking = (cb == nullptr);
 
